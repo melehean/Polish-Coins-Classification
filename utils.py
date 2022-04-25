@@ -126,3 +126,8 @@ def augment(image):
     angle = random.uniform(-20, 20)
     rotated = TF.rotate(flipped, angle=angle)
     return rotated
+
+
+def get_random_image(data_object):
+    images = load_images(data_object)
+    return random.choice(images)
