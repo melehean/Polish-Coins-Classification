@@ -3,6 +3,9 @@ from PIL import Image
 import glob
 import numpy as np
 from sewar.full_ref import mse
+import torchvision.transforms.functional as TF
+import random
+import os
 
 
 def count_resolution(path):
@@ -97,3 +100,34 @@ def calculate_mse_between_average_images(class_array):
 
     return mse_matrix
 
+
+def scale_all_images(datasets_paths_list):
+    for dataset in datasets_paths_list:
+        coins = os.listdir(dataset)
+        for coin in coins:
+            images = os.listdir(os.path.join(dataset, coin))
+            for image in images:
+                img = Image.open(os.path.join(dataset, coin, image))
+                img = img.resize((224, 224))
+                img.save(os.path.join(dataset, coin, image))
+
+
+def normalize_image(image):
+    tensor = TF.pil_to_tensor(image)
+    tensor = tensor.float()
+    normalized = TF.normalize(tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    normalized = TF.invert(normalized)
+    return normalized
+
+
+def augment(image):
+    tensor = TF.pil_to_tensor(image)
+    flipped = TF.hflip(tensor)
+    angle = random.uniform(-20, 20)
+    rotated = TF.rotate(flipped, angle=angle)
+    return rotated
+
+
+def get_random_image(data_object):
+    images = load_images(data_object)
+    return random.choice(images)
